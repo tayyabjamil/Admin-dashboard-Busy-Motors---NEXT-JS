@@ -14,7 +14,6 @@ import {
     useReactTable,
 } from "@tanstack/react-table"
 import { ArrowDown } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -152,7 +151,7 @@ export const columns: ColumnDef<Payment>[] = [
         id: "actions",
         header: "Actions",
         enableHiding: false,
-        cell: ({ row }) => {
+        cell: () => {
             return (
                 <div className="flex flex-row items-center">
                     <h1>Remove agent</h1>
