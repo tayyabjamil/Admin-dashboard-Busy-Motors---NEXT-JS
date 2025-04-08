@@ -418,7 +418,13 @@ export function DataTableDemo() {
                 </div>
                 <div className="flex items-center gap-2 ">
                     <span className="text-sm ">Result per page</span>
-                    <Select value={String(pageSize)} onValueChange={(value) => setPageSize(Number(value))}>
+                    <Select
+                        value={String(pageSize)}
+                        onValueChange={(value) => {
+                            setPageIndex(0);
+                            setPageSize(Number(value));
+                        }}
+                    >
                         <SelectTrigger className="h-8 w-[70px]">
                             <SelectValue placeholder={pageSize} />
                         </SelectTrigger>
