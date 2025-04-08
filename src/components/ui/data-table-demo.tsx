@@ -410,7 +410,7 @@ export function DataTableDemo() {
                             <PaginationItem>
                                 <PaginationNext
                                     onClick={() => setPageIndex(old => Math.min(table.getPageCount() - 1, old + 1))}
-                                    disabled={!table.getCanNextPage()}
+                                    // disabled={!table.getCanNextPage()}
                                     className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : ""}
                                 />
                             </PaginationItem>
