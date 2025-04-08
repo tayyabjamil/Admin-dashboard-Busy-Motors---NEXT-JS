@@ -153,8 +153,6 @@ export const columns: ColumnDef<Payment>[] = [
         header: "Actions",
         enableHiding: false,
         cell: ({ row }) => {
-            const payment = row.original
-
             return (
                 <div className="flex flex-row items-center">
                     <h1>Remove agent</h1>
