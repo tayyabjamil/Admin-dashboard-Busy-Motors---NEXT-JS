@@ -1,10 +1,10 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/button"
+"use client"
+import TablePage from "./(main)/table/page";
 
 export default function Home() {
   return (
-    <div>
-      <Button>Button</Button>
+    <div className="px-10 py-8">
+      <TablePage />
     </div>
   );
 }
