@@ -269,7 +269,6 @@ export function DataTableDemo() {
 
     const generatePaginationItems = () => {
         const items = []
-        const maxVisiblePages = 5
         const ellipsisThreshold = 7
 
         if (totalPages <= ellipsisThreshold) {
