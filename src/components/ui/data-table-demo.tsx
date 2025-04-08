@@ -19,6 +19,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Image from "next/image"
 import { Badge } from "./badge"
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./pagination"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
 
 const data: Payment[] = [
     {
@@ -63,6 +65,56 @@ const data: Payment[] = [
     },
     {
         id: "5",
+        agent: {
+            agentsName: "Kate Morrison",
+            agentsAccount: "@kate",
+            agnetsImage: "/users/image5.svg"
+        },
+        "subscription-type": "Scrap",
+        "contact-number": +61412345678,
+    },
+    {
+        id: "6",
+        agent: {
+            agentsName: "Kate Morrison",
+            agentsAccount: "@kate",
+            agnetsImage: "/users/image5.svg"
+        },
+        "subscription-type": "Scrap",
+        "contact-number": +61412345678,
+    },
+    {
+        id: "7",
+        agent: {
+            agentsName: "Kate Morrison",
+            agentsAccount: "@kate",
+            agnetsImage: "/users/image5.svg"
+        },
+        "subscription-type": "Scrap",
+        "contact-number": +61412345678,
+    },
+    {
+        id: "8",
+        agent: {
+            agentsName: "Kate Morrison",
+            agentsAccount: "@kate",
+            agnetsImage: "/users/image5.svg"
+        },
+        "subscription-type": "Scrap",
+        "contact-number": +61412345678,
+    },
+    {
+        id: "9",
+        agent: {
+            agentsName: "Kate Morrison",
+            agentsAccount: "@kate",
+            agnetsImage: "/users/image5.svg"
+        },
+        "subscription-type": "Scrap",
+        "contact-number": +61412345678,
+    },
+    {
+        id: "10",
         agent: {
             agentsName: "Kate Morrison",
             agentsAccount: "@kate",
@@ -186,6 +238,8 @@ export function DataTableDemo() {
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
+    const [pageSize, setPageSize] = React.useState(5)
+    const [pageIndex, setPageIndex] = React.useState(0)
 
     const table = useReactTable({
         data,
@@ -203,8 +257,48 @@ export function DataTableDemo() {
             columnFilters,
             columnVisibility,
             rowSelection,
+            pagination: {
+                pageIndex,
+                pageSize,
+            },
         },
     })
+
+    const totalPages = table.getPageCount()
+    const currentPage = table.getState().pagination.pageIndex + 1
+
+    const generatePaginationItems = () => {
+        const items = []
+        const maxVisiblePages = 5
+        const ellipsisThreshold = 7
+
+        if (totalPages <= ellipsisThreshold) {
+            for (let i = 1; i <= totalPages; i++) {
+                items.push(i)
+            }
+        } else {
+            items.push(1)
+
+            if (currentPage > 3) {
+                items.push("ellipsis-start")
+            }
+
+            const startPage = Math.max(2, currentPage - 1)
+            const endPage = Math.min(totalPages - 1, currentPage + 1)
+
+            for (let i = startPage; i <= endPage; i++) {
+                items.push(i)
+            }
+
+            if (currentPage < totalPages - 2) {
+                items.push("ellipsis-end")
+            }
+
+            items.push(totalPages)
+        }
+
+        return items
+    }
 
     return (
         <div className="w-full">
@@ -249,7 +343,7 @@ export function DataTableDemo() {
                 <Table className="bg-[#FAFAFA]">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
+                            <TableRow className="" key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
                                         <TableHead key={header.id}>
@@ -265,13 +359,13 @@ export function DataTableDemo() {
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                        <TableCell className="p-5 " key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                                     ))}
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                <TableCell colSpan={columns.length} className="h-[55vh] text-center">
                                     No results.
                                 </TableCell>
                             </TableRow>
@@ -279,23 +373,64 @@ export function DataTableDemo() {
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
-                    selected.
+            <div className="flex gap-10 mt-5">
+                <div>
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    onClick={() => setPageIndex(prev => Math.max(0, prev - 1))}
+                                    // disabled={!table.getCanPreviousPage()}
+                                    className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : ""}
+                                />
+                            </PaginationItem>
+
+                            {generatePaginationItems().map((item, index) => {
+                                if (item === "ellipsis-start" || item === "ellipsis-end") {
+                                    return (
+                                        <PaginationItem key={`ellipsis-${index}`}>
+                                            <PaginationEllipsis />
+                                        </PaginationItem>
+                                    )
+                                }
+
+                                return (
+                                    <PaginationItem key={index}>
+                                        <PaginationLink
+                                            isActive={currentPage === item}
+                                            onClick={() => setPageIndex(Number(item) - 1)}
+                                            className={currentPage === item ? "bg-blue-700 text-white " : "border-[1px]"}
+                                        >
+                                            {item}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                )
+                            })}
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    onClick={() => setPageIndex(old => Math.min(table.getPageCount() - 1, old + 1))}
+                                    disabled={!table.getCanNextPage()}
+                                    className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : ""}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
                 </div>
-                <div className="space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        Previous
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-                        Next
-                    </Button>
+                <div className="flex items-center gap-2 ">
+                    <span className="text-sm ">Result per page</span>
+                    <Select value={String(pageSize)} onValueChange={(value) => setPageSize(Number(value))}>
+                        <SelectTrigger className="h-8 w-[70px]">
+                            <SelectValue placeholder={pageSize} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {[5, 10, 20, 30, 40, 50].map((size) => (
+                                <SelectItem key={size} value={String(size)}>
+                                    {size}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
         </div>
