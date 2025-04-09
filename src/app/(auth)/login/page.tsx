@@ -134,7 +134,7 @@ export default function Login() {
                 </Form>
 
                 <p className="mt-4 text-xs text-center text-gray-600">
-                    Don't have an account? Sign up today to access exclusive features and opportunities!
+                    Don&#39;t have an account? Sign up today to access exclusive features and opportunities!
                 </p>
             </div>
         </div>
