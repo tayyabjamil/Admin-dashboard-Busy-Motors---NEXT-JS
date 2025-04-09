@@ -1,10 +1,10 @@
 "use client"
-import TablePage from "./(main)/table/page";
+import Login from "./(auth)/login/page";
 
 export default function Home() {
   return (
-    <div className="px-10 py-8">
-      <TablePage />
+    <div>
+      <Login />
     </div>
   );
 }
