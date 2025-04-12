@@ -30,6 +30,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import Image from "next/image"
 
 export type User = {
     _id: string
@@ -192,14 +193,7 @@ export function DataTableDemo() {
                     <div className="flex flex-row items-center">
                         <h1 className="text-sm text-gray-500">Remove user</h1>
                         <Button variant="ghost" onClick={() => deleteUser(user._id)}>
-                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M5.5 1C5.22386 1 5 1.22386 5 1.5C5 1.77614 5.22386 2 5.5 2H9.5C9.77614 2 10 1.77614 10 1.5C10 1.22386 9.77614 1 9.5 1H5.5ZM3 3.5C3 3.22386 3.22386 3 3.5 3H11.5C11.7761 3 12 3.22386 12 3.5C12 3.77614 11.7761 4 11.5 4H3.5C3.22386 4 3 3.77614 3 3.5ZM3.5 5C3.22386 5 3 5.22386 3 5.5V12.5C3 12.7761 3.22386 13 3.5 13H11.5C11.7761 13 12 12.7761 12 12.5V5.5C12 5.22386 11.7761 5 11.5 5H3.5ZM5 7.5C5 7.22386 5.22386 7 5.5 7C5.77614 7 6 7.22386 6 7.5V10.5C6 10.7761 5.77614 11 5.5 11C5.22386 11 5 10.7761 5 10.5V7.5ZM9 7.5C9 7.22386 9.22386 7 9.5 7C9.77614 7 10 7.22386 10 7.5V10.5C10 10.7761 9.77614 11 9.5 11C9.22386 11 9 10.7761 9 10.5V7.5Z"
-                                    fill="currentColor"
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                ></path>
-                            </svg>
+                            <Image color="red" src={"/delete.svg"} alt={""} width={18} height={18} />
                         </Button>
                     </div>
                 )
