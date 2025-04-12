@@ -192,7 +192,7 @@ export function DataTableDemo() {
                 return (
                     <div className="flex flex-row items-center">
                         <h1 className="text-sm text-gray-500">Remove user</h1>
-                        <Button variant="ghost" onClick={() => deleteUser(user._id)}>
+                        <Button variant="ghost" className="hover:bg-gray-200 rounded-full" onClick={() => deleteUser(user._id)}>
                             <Image color="red" src={"/delete.svg"} alt={""} width={18} height={18} />
                         </Button>
                     </div>
