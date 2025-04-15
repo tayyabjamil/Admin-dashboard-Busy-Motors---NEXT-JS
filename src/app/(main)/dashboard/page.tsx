@@ -2,6 +2,7 @@
 import { DataTableDemo } from "@/components/ui/data-table-demo";
 import Image from "next/image";
 import TopChalenders from "../topCalenders/page";
+import UserActivityCharts from "./components/UserActivityCharts";
 
 export default function TablePage() {
     return (
@@ -12,6 +13,7 @@ export default function TablePage() {
             </div>
             <TopChalenders />
             <DataTableDemo />
+            <UserActivityCharts />
         </div >
     )
 }

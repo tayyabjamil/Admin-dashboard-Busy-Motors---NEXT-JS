@@ -1,10 +1,25 @@
 "use client";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import { useSelector } from 'react-redux';
+
+interface RootState {
+    agents: {
+        totalAgents: number;
+        subscribedAgents: number;
+    }
+}
 
 export default function TopChalenders() {
+    const { totalAgents, subscribedAgents } = useSelector((state: RootState) => state.agents)
+
+    // Log the values from Redux
+    useEffect(() => {
+        console.log("Redux total agents:", totalAgents)
+        console.log("Redux subscribed agents:", subscribedAgents)
+    }, [totalAgents, subscribedAgents])
     // Sample data for the charts
     const subscriberData = [
         { value: 15 }, { value: 18 }, { value: 16 }, { value: 20 },
@@ -37,7 +52,7 @@ export default function TopChalenders() {
                         </Select>
                     </div>
                     <div className="mt-2 ">
-                        <h2 className="text-2xl font-semibold text-gray-700">178+</h2>
+                        <h2 className="text-2xl font-semibold text-gray-700">{totalAgents}</h2>
                         <p className="text-sm text-gray-500">Agents</p>
                     </div>
                 </CardContent>
@@ -60,7 +75,7 @@ export default function TopChalenders() {
                     </div>
 
                     <div className="mt-2">
-                        <h2 className="text-2xl font-semibold text-gray-700">178+</h2>
+                        <h2 className="text-2xl font-semibold text-gray-700">{subscribedAgents}</h2>
                         <p className="text-sm text-gray-500">New Subscribers</p>
                     </div>
                 </CardContent>

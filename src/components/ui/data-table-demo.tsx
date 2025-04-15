@@ -32,6 +32,8 @@ import { toast } from "sonner"
 import Image from "next/image"
 import { SellerChart } from "@/app/(main)/dashboard/components/SellerChart"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./alert-dialog"
+import { useAppDispatch } from "@/redux/hooks"
+import { fetchAgentsFailure, fetchAgentsStart, fetchAgentsSuccess } from "@/redux/features/agentSlice"
 
 export type User = {
     _id: string
@@ -55,6 +57,7 @@ export type User = {
 }
 
 export function DataTableDemo() {
+    const dispatch = useAppDispatch()
     const [users, setUsers] = React.useState<User[]>([])
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
@@ -66,16 +69,31 @@ export function DataTableDemo() {
     const [pageSize, setPageSize] = React.useState(5)
     const [pageIndex, setPageIndex] = React.useState(0)
 
+
+
     const fetchUsers = async () => {
         try {
+            dispatch(fetchAgentsStart())
             const response = await fetch("https://scrape4you.onrender.com/auth/list-all-agents")
             if (!response.ok) {
                 throw new Error("Failed to fetch users")
             }
             const data = await response.json()
             setUsers(data)
+
+            // Calculate total and subscribed agents
+            const total = data.length
+            const subscribed = data.filter((user: User) => user.is_subscribed !== "None").length
+
+            // Update Redux store
+            dispatch(fetchAgentsSuccess({
+                totalAgents: total,
+                subscribedAgents: subscribed
+            }))
         } catch (err) {
-            setError("Error fetching users data")
+            const errorMessage = "Error fetching users data"
+            setError(errorMessage)
+            dispatch(fetchAgentsFailure(errorMessage))
             console.error(err)
         } finally {
             setLoading(false)
@@ -84,7 +102,7 @@ export function DataTableDemo() {
 
     React.useEffect(() => {
         fetchUsers()
-    }, [])
+    }, [dispatch])
 
     const deleteUser = async (userId: string) => {
         try {
@@ -97,7 +115,17 @@ export function DataTableDemo() {
             }
 
             // Update the users state by filtering out the deleted user
-            setUsers(users.filter((user) => user._id !== userId))
+            const updatedUsers = users.filter((user) => user._id !== userId)
+            setUsers(updatedUsers)
+
+            // Update Redux store with new counts
+            const total = updatedUsers.length
+            const subscribed = updatedUsers.filter(user => user.is_subscribed !== "None").length
+
+            dispatch(fetchAgentsSuccess({
+                totalAgents: total,
+                subscribedAgents: subscribed
+            }))
 
             toast("User deleted sucessfully", {
                 description: "User has been successfully removed",
