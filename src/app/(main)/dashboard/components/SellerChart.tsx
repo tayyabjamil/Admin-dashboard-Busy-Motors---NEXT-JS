@@ -13,6 +13,14 @@ interface SellerChartProps {
     subtitle?: string
 }
 
+interface CustomTooltipProps {
+    x: number | string
+    y: number | string
+    width: number | string
+    height: string | number
+    value: number
+}
+
 export function SellerChart({ title = "Activity by agent", subtitle = "Average Sellers" }: SellerChartProps) {
     const [timeframe, setTimeframe] = useState("Weekly")
 
@@ -29,7 +37,6 @@ export function SellerChart({ title = "Activity by agent", subtitle = "Average S
 
     // Find the highest value for special styling
     const maxValue = Math.max(...data.map((item) => item.value))
-    const maxIndex = data.findIndex((item) => item.value === maxValue)
 
     // Chart configuration
     const chartConfig = {
@@ -40,13 +47,17 @@ export function SellerChart({ title = "Activity by agent", subtitle = "Average S
         maxValue: {
             label: "Max Value",
             color: "#4263EB",
-        }
+        },
     }
 
     // Custom tooltip component for the highest value
-    const CustomTooltip = ({ x, y, width, height, value }: any) => {
+    const CustomTooltip = ({ x, y, width, value }: CustomTooltipProps) => {
+        // Convert x and width to numbers if they're percentages
+        const xValue = typeof x === "string" ? 0 : x
+        const widthValue = typeof width === "string" ? 0 : width
+
         return (
-            <g transform={`translate(${x + width / 2 - 15}, ${y - 40})`}>
+            <g transform={`translate(${xValue + widthValue / 2 - 15}, ${typeof y === "string" ? 0 : y - 40})`}>
                 <rect x="0" y="0" width="30" height="30" rx="6" fill="#1E1E30" />
                 <text x="15" y="20" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
                     {value}
