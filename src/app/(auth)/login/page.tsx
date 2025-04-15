@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
 const formSchema = z.object({
@@ -52,10 +53,10 @@ export default function Login() {
             if (!response.ok) {
                 throw new Error(data.message || "Login failed")
             }
-
-            setTimeout(() => {
-                router.push("/dashboard")
-            }, 1500)
+            toast("Logged in", {
+                description: "Logged in succesfully",
+            })
+            router.push("/dashboard")
         } catch (err) {
             console.error("Login error:", err)
             setError(err instanceof Error ? err.message : "Failed to login. Please try again.")

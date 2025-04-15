@@ -31,6 +31,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from "date-fns"
 import { toast } from "sonner"
 import Image from "next/image"
+import { SellerChart } from "@/app/(main)/dashboard/components/SellerChart"
 
 export type User = {
     _id: string
@@ -175,14 +176,7 @@ export function DataTableDemo() {
             header: "Contact Number",
             cell: ({ row }) => <div>{row.original.phone}</div>,
         },
-        {
-            accessorKey: "date_created",
-            header: "Date Created",
-            cell: ({ row }) => {
-                const date = new Date(row.original.date_created)
-                return <div>{format(date, "MMM dd, yyyy")}</div>
-            },
-        },
+
         {
             id: "actions",
             header: "Actions",
@@ -269,48 +263,52 @@ export function DataTableDemo() {
 
     return (
         <div className="w-full">
-
-            <div className="rounded-md border">
-                <div className="border-b-[1px] py-4 px-3">
-                    <h1 className="text-md font-semibold">Users Information</h1>
-                    <h1 className="text-gray-500 text-sm">You can find all the information related to users here</h1>
-                </div>
-                <Table className="bg-[#FAFAFA]">
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow className="" key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                        </TableHead>
-                                    )
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell className="p-5" key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
-                                    ))}
+            <div className="flex flex-row justify-between gap-10">
+                {/* Users Data table  */}
+                <div className="rounded-md border w-full ">
+                    <div className="border-b-[1px] bg-white rounded-t-md py-4 px-3">
+                        <h1 className="text-md font-semibold">Users Information</h1>
+                        <h1 className="text-gray-500 text-sm">You can find all the information related to users here</h1>
+                    </div>
+                    <Table className="bg-[#FAFAFA] rounded-b-md">
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow className="" key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => {
+                                        return (
+                                            <TableHead key={header.id}>
+                                                {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                            </TableHead>
+                                        )
+                                    })}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-[55vh] text-center">
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell className="p-5" key={cell.id}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-[55vh] text-center">
+                                        No results.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+                {/* Seller activity chart  */}
+                <SellerChart />
             </div>
-            <div className="flex gap-10 mt-5">
+            <div className="flex gap-10 mt-5 ">
                 <div>
                     <Pagination>
                         <PaginationContent>
