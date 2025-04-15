@@ -74,7 +74,7 @@ export default function Login() {
         >
             <div className="w-full max-w-md p-8 rounded-lg bg-white/50 backdrop-blur-sm shadow-lg">
                 <h1 className="text-2xl font-semibold text-center mb-6 text-blue-600">
-                    Get Paid More - Enter your reg and get an Offer that beats Scrap Value!
+                    Admin Portal
                 </h1>
 
                 {error && <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
