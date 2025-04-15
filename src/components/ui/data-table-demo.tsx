@@ -32,6 +32,7 @@ import { format } from "date-fns"
 import { toast } from "sonner"
 import Image from "next/image"
 import { SellerChart } from "@/app/(main)/dashboard/components/SellerChart"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./alert-dialog"
 
 export type User = {
     _id: string
@@ -63,7 +64,7 @@ export function DataTableDemo() {
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
-    const [pageSize, setPageSize] = React.useState(10)
+    const [pageSize, setPageSize] = React.useState(5)
     const [pageIndex, setPageIndex] = React.useState(0)
 
     const fetchUsers = async () => {
@@ -182,15 +183,38 @@ export function DataTableDemo() {
             header: "Actions",
             enableHiding: false,
             cell: ({ row }) => {
-                const user = row.original
+                const user = row.original;
+
                 return (
                     <div className="flex flex-row items-center">
                         <h1 className="text-sm text-gray-500">Remove user</h1>
-                        <Button variant="ghost" className="hover:bg-gray-200 rounded-full" onClick={() => deleteUser(user._id)}>
-                            <Image color="red" src={"/delete.svg"} alt={""} width={18} height={18} />
-                        </Button>
+
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="ghost" className="hover:bg-gray-200 rounded-full">
+                                    <Image color="red" src={"/delete.svg"} alt={"Delete user"} width={18} height={18} />
+                                </Button>
+                            </AlertDialogTrigger>
+
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the
+                                        user account and remove their data from our servers.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => deleteUser(user._id)} className="bg-red-600 hover:bg-red-700">
+                                        Delete
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
-                )
+                );
             },
         },
     ]
@@ -263,7 +287,7 @@ export function DataTableDemo() {
 
     return (
         <div className="w-full">
-            <div className="flex flex-row justify-between gap-10">
+            <div className="flex flex-col md:flex-row justify-between gap-10">
                 {/* Users Data table  */}
                 <div className="rounded-md border w-full ">
                     <div className="border-b-[1px] bg-white rounded-t-md py-4 px-3">

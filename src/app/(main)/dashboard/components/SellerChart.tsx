@@ -56,7 +56,7 @@ export function SellerChart({ title = "Activity by agent", subtitle = "Average S
     }
 
     return (
-        <div className="w-[35%] rounded-md border bg-white p-6 shadow-sm">
+        <div className="md:w-[35%] w-full rounded-md border bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center justify-between">
                 <div>
                     <p className="text-sm text-muted-foreground">{title}</p>
