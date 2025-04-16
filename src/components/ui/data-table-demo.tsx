@@ -165,13 +165,13 @@ export function DataTableDemo() {
                 const user = row.original
                 return (
                     <div className="flex items-center gap-2">
-                        {/* <Image
+                        <Image
                             width={35}
                             height={35}
                             src={user.profile_image || "/placeholder.svg"}
                             alt={`${user.first_name} ${user.last_name}`}
                             className="rounded-full"
-                        /> */}
+                        />
                         <div className="flex flex-col">
                             <span className="font-medium">
                                 {user.first_name} {user.last_name}
