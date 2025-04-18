@@ -2,8 +2,6 @@
 import { DataTableDemo } from "@/components/ui/data-table-demo";
 import Image from "next/image";
 import TopChalenders from "../topCalenders/page";
-import UserActivityCharts from "./components/UserActivityCharts";
-
 export default function TablePage() {
     return (
         <div className="w-full bg-[#8796e11a] px-10 py-8">
@@ -13,7 +11,7 @@ export default function TablePage() {
             </div>
             <TopChalenders />
             <DataTableDemo />
-            <UserActivityCharts />
+            {/* <UserActivityCharts /> */}
         </div >
     )
 }

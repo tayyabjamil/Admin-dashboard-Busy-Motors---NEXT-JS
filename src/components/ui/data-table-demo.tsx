@@ -68,6 +68,7 @@ export function DataTableDemo() {
     const [rowSelection, setRowSelection] = React.useState({})
     const [pageSize, setPageSize] = React.useState(5)
     const [pageIndex, setPageIndex] = React.useState(0)
+    const [subscriptionFilter, setSubscriptionFilter] = React.useState("all")
 
 
 
@@ -103,6 +104,15 @@ export function DataTableDemo() {
     React.useEffect(() => {
         fetchUsers()
     }, [dispatch])
+
+    React.useEffect(() => {
+        // Apply subscription filter
+        if (subscriptionFilter !== "all") {
+            table.getColumn("is_subscribed")?.setFilterValue(subscriptionFilter)
+        } else {
+            table.getColumn("is_subscribed")?.setFilterValue(undefined)
+        }
+    }, [subscriptionFilter])
 
     const deleteUser = async (userId: string) => {
         try {
@@ -321,6 +331,29 @@ export function DataTableDemo() {
                         <h1 className="text-md font-semibold">Users Information</h1>
                         <h1 className="text-gray-500 text-sm">You can find all the information related to users here</h1>
                     </div>
+
+                    <div className="bg-white p-3 border-b flex w-full flex-row-reverse">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm">Filter by subscription:</span>
+                            <Select
+                                value={subscriptionFilter}
+                                onValueChange={setSubscriptionFilter}
+                            >
+                                <SelectTrigger className="h-8 w-[180px]">
+                                    <SelectValue placeholder="Select subscription" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Subscriptions</SelectItem>
+                                    <SelectItem value="corporate">Corporate</SelectItem>
+                                    <SelectItem value="Corporate Salvage">Corporate Salvage</SelectItem>
+                                    <SelectItem value="Scrap Weekly">Scrap Weekly</SelectItem>
+                                    <SelectItem value="Scrap Monthly">Scrap Monthly</SelectItem>
+                                    <SelectItem value="None">None</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
                     <Table className="bg-[#FAFAFA] rounded-b-md">
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (

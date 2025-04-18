@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts"
 import { ChevronDown } from "lucide-react"
 
@@ -21,22 +21,114 @@ interface CustomTooltipProps {
     value: number
 }
 
-export function SellerChart({ title = "Activity by agent", subtitle = "Average Sellers" }: SellerChartProps) {
-    const [timeframe, setTimeframe] = useState("Weekly")
+interface User {
+    _id: string
+    first_name: string
+    last_name: string
+    email: string
+    phone: string
+    is_subscribed: string
+    date_created: string
+    date_updated: string
+}
 
-    // Sample data for the chart
-    const data = [
-        { day: "MON", value: 8 },
-        { day: "TUE", value: 4 },
-        { day: "WED", value: 9 },
-        { day: "THU", value: 5 },
-        { day: "FRI", value: 37 },
-        { day: "SAT", value: 3 },
-        { day: "SUN", value: 8 },
-    ]
+interface ChartDataItem {
+    day: string
+    value: number
+}
+
+export function SellerChart({ title = "Activity by agent", subtitle = "Agent Signups" }: SellerChartProps) {
+    const [timeframe, setTimeframe] = useState("Weekly")
+    const [chartData, setChartData] = useState<ChartDataItem[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    // Function to process user data based on timeframe
+    const processData = (users: User[], timeframe: string): ChartDataItem[] => {
+        if (!users || users.length === 0) return []
+
+        // Group users by the appropriate time unit
+        const groupedData: Record<string, number> = {}
+
+        users.forEach((user) => {
+            const date = new Date(user.date_created)
+            let key = ""
+
+            if (timeframe === "Daily") {
+                // Format as YYYY-MM-DD
+                key = date.toISOString().split("T")[0]
+            } else if (timeframe === "Weekly") {
+                // Get day of week (0-6, where 0 is Sunday)
+                const dayOfWeek = date.getDay()
+                const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+                key = days[dayOfWeek]
+            } else if (timeframe === "Monthly") {
+                // Get month (0-11, where 0 is January)
+                const month = date.getMonth()
+                const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+                key = months[month]
+            }
+
+            if (!groupedData[key]) {
+                groupedData[key] = 0
+            }
+            groupedData[key]++
+        })
+
+        // Convert grouped data to array format for chart
+        let formattedData: ChartDataItem[] = []
+
+        if (timeframe === "Daily") {
+            // Sort dates chronologically
+            formattedData = Object.entries(groupedData)
+                .map(([date, count]) => ({ day: date, value: count }))
+                .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime())
+                .slice(-7) // Show only last 7 days
+        } else if (timeframe === "Weekly") {
+            // Order by day of week (starting with Monday)
+            const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+            formattedData = days.map((day) => ({
+                day,
+                value: groupedData[day] || 0,
+            }))
+        } else if (timeframe === "Monthly") {
+            // Order by month
+            const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+            formattedData = months.map((month) => ({
+                day: month,
+                value: groupedData[month] || 0,
+            }))
+        }
+
+        return formattedData
+    }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true)
+            try {
+                const response = await fetch("https://scrape4you.onrender.com/auth/list-all-agents")
+                if (!response.ok) {
+                    throw new Error("Failed to fetch user data")
+                }
+                const users = await response.json()
+
+                // Process data based on the selected timeframe
+                const processedData = processData(users, timeframe)
+                setChartData(processedData)
+            } catch (err) {
+                console.error("Error fetching chart data:", err)
+                setError("Failed to load chart data")
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchData()
+    }, [timeframe])
 
     // Find the highest value for special styling
-    const maxValue = Math.max(...data.map((item) => item.value))
+    const maxValue = chartData.length > 0 ? Math.max(...chartData.map((item) => item.value)) : 0
 
     // Chart configuration
     const chartConfig = {
@@ -88,30 +180,40 @@ export function SellerChart({ title = "Activity by agent", subtitle = "Average S
                 </DropdownMenu>
             </div>
 
-            <ChartContainer className="min-h-[400px] w-full " config={chartConfig}>
-                <BarChart data={data} margin={{ top: 40, right: 10, left: 10, bottom: 20 }}>
-                    <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="#e5e7eb" />
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dx={-10} />
-                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                        {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.value === maxValue ? "#4263EB" : "#EBF2FF"} />
-                        ))}
-                        {data.map((entry, index) =>
-                            entry.value === maxValue ? (
-                                <CustomTooltip
-                                    key={`tooltip-${index}`}
-                                    x={index * (100 / data.length) + "%"}
-                                    y={0}
-                                    width={100 / data.length + "%"}
-                                    height="100%"
-                                    value={entry.value}
-                                />
-                            ) : null,
-                        )}
-                    </Bar>
-                </BarChart>
-            </ChartContainer>
+            {loading ? (
+                <div className="flex justify-center items-center min-h-[400px]">
+                    <p>Loading chart data...</p>
+                </div>
+            ) : error ? (
+                <div className="flex justify-center items-center min-h-[400px]">
+                    <p className="text-red-500">{error}</p>
+                </div>
+            ) : (
+                <ChartContainer className="min-h-[400px] w-full" config={chartConfig}>
+                    <BarChart data={chartData} margin={{ top: 40, right: 10, left: 10, bottom: 20 }}>
+                        <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="#e5e7eb" />
+                        <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dx={-10} />
+                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                            {chartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.value === maxValue && maxValue > 0 ? "#4263EB" : "#EBF2FF"} />
+                            ))}
+                            {chartData.map((entry, index) =>
+                                entry.value === maxValue && maxValue > 0 ? (
+                                    <CustomTooltip
+                                        key={`tooltip-${index}`}
+                                        x={index * (100 / chartData.length) + "%"}
+                                        y={0}
+                                        width={100 / chartData.length + "%"}
+                                        height="100%"
+                                        value={entry.value}
+                                    />
+                                ) : null,
+                            )}
+                        </Bar>
+                    </BarChart>
+                </ChartContainer>
+            )}
         </div>
     )
 }

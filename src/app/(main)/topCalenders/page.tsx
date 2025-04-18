@@ -85,7 +85,7 @@ export default function TopChalenders() {
             <Card className="w-56 bg-white">
                 <CardContent className="pt-4">
                     <div>
-                        <h2 className="text-2xl font-semibold text-gray-700">20+</h2>
+                        <h2 className="text-2xl font-semibold text-gray-700">{subscribedAgents}</h2>
                         <p className="text-sm text-gray-500">Total subscribers</p>
                     </div>
                     <div className="h-12 mt-2">
