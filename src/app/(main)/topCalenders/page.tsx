@@ -50,10 +50,10 @@ export default function TopChalenders() {
     const [week, setWeek] = useState("Week")
 
     // Get filter label for display
-    const getFilterLabel = () => {
-        if (subscriptionFilter === "all") return ""
-        return ` (${subscriptionFilter})`
-    }
+    // const getFilterLabel = () => {
+    //     if (subscriptionFilter === "all") return ""
+    //     return ` (${subscriptionFilter})`
+    // }
 
     return (
         <div className="flex flex-wrap gap-4 py-5">

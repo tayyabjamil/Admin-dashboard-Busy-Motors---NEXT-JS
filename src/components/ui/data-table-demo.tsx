@@ -28,7 +28,7 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "sonner"
+// import { toast } from "sonner"
 import Image from "next/image"
 import { SellerChart } from "@/app/(main)/dashboard/components/SellerChart"
 import {
@@ -111,29 +111,29 @@ export function DataTableDemo() {
         fetchUsers()
     }, [dispatch])
 
-    const deleteUser = async (userId: string) => {
-        try {
-            const response = await fetch(`https://scrape4you.onrender.com/auth/delete-agent/${userId}`, {
-                method: "DELETE",
-            })
+    // const deleteUser = async (userId: string) => {
+    //     try {
+    //         const response = await fetch(`https://scrape4you.onrender.com/auth/delete-agent/${userId}`, {
+    //             method: "DELETE",
+    //         })
 
-            if (!response.ok) {
-                throw new Error("Failed to delete user")
-            }
+    //         if (!response.ok) {
+    //             throw new Error("Failed to delete user")
+    //         }
 
-            // Refresh data after deletion
-            fetchUsers()
+    //         // Refresh data after deletion
+    //         fetchUsers()
 
-            toast("User deleted successfully", {
-                description: "User has been successfully removed",
-            })
-        } catch (err) {
-            console.error("Error deleting user:", err)
-            toast("Error", {
-                description: "Failed to delete user",
-            })
-        }
-    }
+    //         toast("User deleted successfully", {
+    //             description: "User has been successfully removed",
+    //         })
+    //     } catch (err) {
+    //         console.error("Error deleting user:", err)
+    //         toast("Error", {
+    //             description: "Failed to delete user",
+    //         })
+    //     }
+    // }
 
     const columns: ColumnDef<User>[] = [
         {
