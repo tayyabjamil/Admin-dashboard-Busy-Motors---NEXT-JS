@@ -1,7 +1,8 @@
+import { DataTableDemo } from "@/components/ui/data-table-demo"
+import Image from "next/image"
+import TopChalenders from "../topCalenders/page"
+import { SubscriptionFilter } from "./components/SubscriptionFilter"
 
-import { DataTableDemo } from "@/components/ui/data-table-demo";
-import Image from "next/image";
-import TopChalenders from "../topCalenders/page";
 export default function TablePage() {
     return (
         <div className="w-full bg-[#8796e11a] px-10 py-8">
@@ -9,10 +10,16 @@ export default function TablePage() {
                 <Image width={35} height={35} src={"/logo.svg"} alt="Logo" />
                 <h1 className="text-2xl font-bold">Welcome to Admin Panel</h1>
             </div>
+
+            {/* Global subscription filter moved to top level */}
+            <div className=" p-4  mb-4">
+                <div className="flex  flex-row-reverse">
+                    <SubscriptionFilter />
+                </div>
+            </div>
+
             <TopChalenders />
             <DataTableDemo />
-            {/* <UserActivityCharts /> */}
-        </div >
+        </div>
     )
 }
-

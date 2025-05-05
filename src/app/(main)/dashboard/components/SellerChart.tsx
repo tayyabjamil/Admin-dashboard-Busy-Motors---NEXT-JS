@@ -7,6 +7,7 @@ import { ChevronDown } from "lucide-react"
 import { ChartContainer } from "@/components/ui/chart"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useAppSelector } from "@/redux/hooks"
 
 interface SellerChartProps {
     title?: string
@@ -42,6 +43,9 @@ export function SellerChart({ title = "Activity by agent", subtitle = "Agent Sig
     const [chartData, setChartData] = useState<ChartDataItem[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
+    // Get filtered users from Redux
+    const { filteredUsers, loading: reduxLoading } = useAppSelector((state) => state.agents)
 
     // Function to process user data based on timeframe
     const processData = (users: User[], timeframe: string): ChartDataItem[] => {
@@ -103,29 +107,24 @@ export function SellerChart({ title = "Activity by agent", subtitle = "Agent Sig
         return formattedData
     }
 
+    // Update chart when filtered users or timeframe changes
     useEffect(() => {
-        const fetchData = async () => {
+        if (reduxLoading) {
             setLoading(true)
-            try {
-                const response = await fetch("https://scrape4you.onrender.com/auth/list-all-agents")
-                if (!response.ok) {
-                    throw new Error("Failed to fetch user data")
-                }
-                const users = await response.json()
-
-                // Process data based on the selected timeframe
-                const processedData = processData(users, timeframe)
-                setChartData(processedData)
-            } catch (err) {
-                console.error("Error fetching chart data:", err)
-                setError("Failed to load chart data")
-            } finally {
-                setLoading(false)
-            }
+            return
         }
 
-        fetchData()
-    }, [timeframe])
+        try {
+            // Process data based on the filtered users from Redux
+            const processedData = processData(filteredUsers, timeframe)
+            setChartData(processedData)
+            setLoading(false)
+        } catch (err) {
+            console.error("Error processing chart data:", err)
+            setError("Failed to process chart data")
+            setLoading(false)
+        }
+    }, [filteredUsers, timeframe, reduxLoading])
 
     // Find the highest value for special styling
     const maxValue = chartData.length > 0 ? Math.max(...chartData.map((item) => item.value)) : 0

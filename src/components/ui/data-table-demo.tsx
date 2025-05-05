@@ -31,8 +31,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner"
 import Image from "next/image"
 import { SellerChart } from "@/app/(main)/dashboard/components/SellerChart"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./alert-dialog"
-import { useAppDispatch } from "@/redux/hooks"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "./alert-dialog"
+import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { fetchAgentsFailure, fetchAgentsStart, fetchAgentsSuccess } from "@/redux/features/agentSlice"
 
 export type User = {
@@ -46,6 +56,7 @@ export type User = {
     phone: string
     password: string
     is_subscribed: string
+    is_blocked: boolean
     date_created: string
     date_updated: string
     login_attempts: Array<{
@@ -58,19 +69,15 @@ export type User = {
 
 export function DataTableDemo() {
     const dispatch = useAppDispatch()
-    const [users, setUsers] = React.useState<User[]>([])
-    const [loading, setLoading] = React.useState(true)
-    const [error, setError] = React.useState<string | null>(null)
-
+    const { filteredUsers, loading, error, subscriptionFilter } = useAppSelector((state) => state.agents)
+    console.log("Filtered Users", filteredUsers)
+    console.log("Subscription filter", subscriptionFilter)
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
     const [pageSize, setPageSize] = React.useState(5)
     const [pageIndex, setPageIndex] = React.useState(0)
-    const [subscriptionFilter, setSubscriptionFilter] = React.useState("all")
-
-
 
     const fetchUsers = async () => {
         try {
@@ -80,39 +87,29 @@ export function DataTableDemo() {
                 throw new Error("Failed to fetch users")
             }
             const data = await response.json()
-            setUsers(data)
 
             // Calculate total and subscribed agents
             const total = data.length
             const subscribed = data.filter((user: User) => user.is_subscribed !== "None").length
 
             // Update Redux store
-            dispatch(fetchAgentsSuccess({
-                totalAgents: total,
-                subscribedAgents: subscribed
-            }))
+            dispatch(
+                fetchAgentsSuccess({
+                    totalAgents: total,
+                    subscribedAgents: subscribed,
+                    allUsers: data,
+                }),
+            )
         } catch (err) {
             const errorMessage = "Error fetching users data"
-            setError(errorMessage)
             dispatch(fetchAgentsFailure(errorMessage))
             console.error(err)
-        } finally {
-            setLoading(false)
         }
     }
 
     React.useEffect(() => {
         fetchUsers()
     }, [dispatch])
-
-    React.useEffect(() => {
-        // Apply subscription filter
-        if (subscriptionFilter !== "all") {
-            table.getColumn("is_subscribed")?.setFilterValue(subscriptionFilter)
-        } else {
-            table.getColumn("is_subscribed")?.setFilterValue(undefined)
-        }
-    }, [subscriptionFilter])
 
     const deleteUser = async (userId: string) => {
         try {
@@ -124,26 +121,16 @@ export function DataTableDemo() {
                 throw new Error("Failed to delete user")
             }
 
-            // Update the users state by filtering out the deleted user
-            const updatedUsers = users.filter((user) => user._id !== userId)
-            setUsers(updatedUsers)
+            // Refresh data after deletion
+            fetchUsers()
 
-            // Update Redux store with new counts
-            const total = updatedUsers.length
-            const subscribed = updatedUsers.filter(user => user.is_subscribed !== "None").length
-
-            dispatch(fetchAgentsSuccess({
-                totalAgents: total,
-                subscribedAgents: subscribed
-            }))
-
-            toast("User deleted sucessfully", {
+            toast("User deleted successfully", {
                 description: "User has been successfully removed",
             })
         } catch (err) {
             console.error("Error deleting user:", err)
             toast("Error", {
-                description: "Failed to delete user"
+                description: "Failed to delete user",
             })
         }
     }
@@ -214,50 +201,59 @@ export function DataTableDemo() {
             header: "Contact Number",
             cell: ({ row }) => <div>{row.original.phone}</div>,
         },
-
         {
             id: "actions",
-            header: "Actions",
+            header: "Blocked Status",
             enableHiding: false,
             cell: ({ row }) => {
-                const user = row.original;
-
-                return (
-                    <div className="flex flex-row items-center">
-                        <h1 className="text-sm text-gray-500">Remove user</h1>
-
+                const user = row.original
+                if (user.is_blocked) {
+                    return (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="ghost" className="hover:bg-gray-200 rounded-full">
-                                    <Image color="red" src={"/delete.svg"} alt={"Delete user"} width={18} height={18} />
-                                </Button>
+                                <Button variant="default" className="bg-green-600 hover:bg-green-700 text-white" size="sm">Unblock</Button>
                             </AlertDialogTrigger>
-
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogTitle>Unblock User?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete the
-                                        user account and remove their data from our servers.
+                                        Are you sure you want to unblock this user? They will regain access to their account.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
-
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => deleteUser(user._id)} className="bg-red-600 hover:bg-red-700">
-                                        Delete
-                                    </AlertDialogAction>
+                                    <AlertDialogAction /* onClick={handleUnblockUser} */>Unblock</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
-                    </div>
-                );
+                    )
+                } else {
+                    return (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" size="sm">Block</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Block User?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to block this user? They will not be able to access their account.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction /* onClick={handleBlockUser} */>Block</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )
+                }
             },
         },
     ]
 
     const table = useReactTable({
-        data: users,
+        data: filteredUsers,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -324,34 +320,12 @@ export function DataTableDemo() {
 
     return (
         <div className="w-full">
-            <div className="flex flex-col md:flex-row justify-between gap-10">
+            <div className="flex flex-col md:flex-row justify-between gap-10 ">
                 {/* Users Data table  */}
-                <div className="rounded-md border w-full ">
+                <div className="rounded-md border w-full bg-white ">
                     <div className="border-b-[1px] bg-white rounded-t-md py-4 px-3">
                         <h1 className="text-md font-semibold">Users Information</h1>
                         <h1 className="text-gray-500 text-sm">You can find all the information related to users here</h1>
-                    </div>
-
-                    <div className="bg-white p-3 border-b flex w-full flex-row-reverse">
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm">Filter by subscription:</span>
-                            <Select
-                                value={subscriptionFilter}
-                                onValueChange={setSubscriptionFilter}
-                            >
-                                <SelectTrigger className="h-8 w-[180px]">
-                                    <SelectValue placeholder="Select subscription" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Subscriptions</SelectItem>
-                                    <SelectItem value="corporate">Corporate</SelectItem>
-                                    <SelectItem value="Corporate Salvage">Corporate Salvage</SelectItem>
-                                    <SelectItem value="Scrap Weekly">Scrap Weekly</SelectItem>
-                                    <SelectItem value="Scrap Monthly">Scrap Monthly</SelectItem>
-                                    <SelectItem value="None">None</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
                     </div>
 
                     <Table className="bg-[#FAFAFA] rounded-b-md">
