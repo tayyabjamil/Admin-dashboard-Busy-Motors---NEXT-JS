@@ -2,11 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts"
-import { ChevronDown } from "lucide-react"
 
 import { ChartContainer } from "@/components/ui/chart"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useAppSelector } from "@/redux/hooks"
 
 interface SellerChartProps {
@@ -39,92 +36,54 @@ interface ChartDataItem {
 }
 
 export function SellerChart({ title = "Activity by agent", subtitle = "Agent Signups" }: SellerChartProps) {
-    const [timeframe, setTimeframe] = useState("Weekly")
     const [chartData, setChartData] = useState<ChartDataItem[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    // Get filtered users from Redux
-    const { filteredUsers, loading: reduxLoading } = useAppSelector((state) => state.agents)
+    // Get filtered users and calendar selections from Redux
+    const { filteredUsers, loading: reduxLoading, selectedMonth } = useAppSelector((state) => state.agents)
 
-    // Function to process user data based on timeframe
-    const processData = (users: User[], timeframe: string): ChartDataItem[] => {
+    // Function to process user data based on selectedMonth
+    const processData = (users: User[], month: string): ChartDataItem[] => {
         if (!users || users.length === 0) return []
 
-        // Group users by the appropriate time unit
+        // Group users by day of week for the selected month
         const groupedData: Record<string, number> = {}
+        const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+        days.forEach((d) => (groupedData[d] = 0))
 
         users.forEach((user) => {
             const date = new Date(user.date_created)
-            let key = ""
-
-            if (timeframe === "Daily") {
-                // Format as YYYY-MM-DD
-                key = date.toISOString().split("T")[0]
-            } else if (timeframe === "Weekly") {
-                // Get day of week (0-6, where 0 is Sunday)
-                const dayOfWeek = date.getDay()
-                const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
-                key = days[dayOfWeek]
-            } else if (timeframe === "Monthly") {
-                // Get month (0-11, where 0 is January)
-                const month = date.getMonth()
-                const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
-                key = months[month]
+            const userMonth = date.toLocaleString("en-US", { month: "short" }).toUpperCase()
+            const dayOfWeek = date.getDay()
+            const dayKey = days[dayOfWeek === 0 ? 6 : dayOfWeek - 1] // Adjust so MON=0, SUN=6
+            if (userMonth === month) {
+                groupedData[dayKey]++
             }
-
-            if (!groupedData[key]) {
-                groupedData[key] = 0
-            }
-            groupedData[key]++
         })
 
-        // Convert grouped data to array format for chart
-        let formattedData: ChartDataItem[] = []
-
-        if (timeframe === "Daily") {
-            // Sort dates chronologically
-            formattedData = Object.entries(groupedData)
-                .map(([date, count]) => ({ day: date, value: count }))
-                .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime())
-                .slice(-7) // Show only last 7 days
-        } else if (timeframe === "Weekly") {
-            // Order by day of week (starting with Monday)
-            const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
-            formattedData = days.map((day) => ({
-                day,
-                value: groupedData[day] || 0,
-            }))
-        } else if (timeframe === "Monthly") {
-            // Order by month
-            const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
-            formattedData = months.map((month) => ({
-                day: month,
-                value: groupedData[month] || 0,
-            }))
-        }
-
-        return formattedData
+        // Format for chart
+        return days.map((d) => ({ day: d, value: groupedData[d] }))
     }
 
-    // Update chart when filtered users or timeframe changes
+    // Update chart when filtered users or calendar selections change
     useEffect(() => {
         if (reduxLoading) {
             setLoading(true)
             return
         }
-
         try {
-            // Process data based on the filtered users from Redux
-            const processedData = processData(filteredUsers, timeframe)
+            const processedData = processData(filteredUsers, selectedMonth)
             setChartData(processedData)
             setLoading(false)
-        } catch (err) {
-            console.error("Error processing chart data:", err)
+            // Log backend data and processed chart data
+            console.log("SellerChart: filteredUsers from backend:", filteredUsers)
+            console.log("SellerChart: processed chartData:", processedData)
+        } catch {
             setError("Failed to process chart data")
             setLoading(false)
         }
-    }, [filteredUsers, timeframe, reduxLoading])
+    }, [filteredUsers, selectedMonth, reduxLoading])
 
     // Find the highest value for special styling
     const maxValue = chartData.length > 0 ? Math.max(...chartData.map((item) => item.value)) : 0
@@ -164,19 +123,6 @@ export function SellerChart({ title = "Activity by agent", subtitle = "Agent Sig
                     <p className="text-sm text-muted-foreground">{title}</p>
                     <h3 className="text-xl font-bold">{subtitle}</h3>
                 </div>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="h-8 gap-1 px-3">
-                            {timeframe}
-                            <ChevronDown className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setTimeframe("Daily")}>Daily</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setTimeframe("Weekly")}>Weekly</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setTimeframe("Monthly")}>Monthly</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
             </div>
 
             {loading ? (

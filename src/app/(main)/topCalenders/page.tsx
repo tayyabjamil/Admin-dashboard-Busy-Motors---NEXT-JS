@@ -1,27 +1,22 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LineChart, Line, ResponsiveContainer } from "recharts"
-import { useSelector } from "react-redux"
-
-interface RootState {
-    agents: {
-        totalAgents: number
-        subscribedAgents: number
-        subscriptionFilter: string
-    }
-}
+import { useAppDispatch, useAppSelector } from "@/redux/hooks"
+import { setSelectedMonth, setSelectedDay } from "@/redux/features/agentSlice"
 
 export default function TopChalenders() {
-    const { totalAgents, subscribedAgents, subscriptionFilter } = useSelector((state: RootState) => state.agents)
+    const dispatch = useAppDispatch()
+    const { totalAgents, subscribedAgents, selectedMonth, selectedDay } = useAppSelector((state) => state.agents)
 
     // Log the values from Redux
     useEffect(() => {
         console.log("Redux total agents:", totalAgents)
         console.log("Redux subscribed agents:", subscribedAgents)
-        console.log("Current filter:", subscriptionFilter)
-    }, [totalAgents, subscribedAgents, subscriptionFilter])
+        console.log("Current month:", selectedMonth)
+        console.log("Current day:", selectedDay)
+    }, [totalAgents, subscribedAgents, selectedMonth, selectedDay])
 
     // Sample data for the charts
     const subscriberData = [
@@ -46,14 +41,9 @@ export default function TopChalenders() {
         { value: 22 },
     ]
 
-    const [month, setMonth] = useState("Month")
-    const [week, setWeek] = useState("Week")
-
-    // Get filter label for display
-    // const getFilterLabel = () => {
-    //     if (subscriptionFilter === "all") return ""
-    //     return ` (${subscriptionFilter})`
-    // }
+    // Month and day options
+    const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+    const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
     return (
         <div className="flex flex-wrap gap-4 py-5">
@@ -61,14 +51,14 @@ export default function TopChalenders() {
             <Card className="w-48 bg-white">
                 <CardContent className="pt-4">
                     <div className=" flex flex-row-reverse w-full">
-                        <Select value={month} onValueChange={setMonth}>
+                        <Select value={selectedMonth} onValueChange={(val) => dispatch(setSelectedMonth(val))}>
                             <SelectTrigger className="w-24 h-8 text-sm border rounded-full mb-4">
                                 <SelectValue placeholder="Month" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Month">Month</SelectItem>
-                                <SelectItem value="Month2">Month2</SelectItem>
-                                <SelectItem value="Month3">Month3</SelectItem>
+                                {months.map((month) => (
+                                    <SelectItem key={month} value={month}>{month}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
@@ -79,22 +69,21 @@ export default function TopChalenders() {
                 </CardContent>
             </Card>
 
-            {/* New Subscribers Card with Week Dropdown */}
+            {/* New Subscribers Card with Day Dropdown */}
             <Card className="w-48 bg-white">
                 <CardContent className="pt-4">
                     <div className="flex flex-row-reverse w-full">
-                        <Select value={week} onValueChange={setWeek}>
+                        <Select value={selectedDay} onValueChange={(val) => dispatch(setSelectedDay(val))}>
                             <SelectTrigger className="w-24 h-8 text-sm border rounded-full mb-4">
-                                <SelectValue placeholder="Week" />
+                                <SelectValue placeholder="Day" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Week">Week</SelectItem>
-                                <SelectItem value="Week 2">Week 2</SelectItem>
-                                <SelectItem value="Week 3">Week 3</SelectItem>
+                                {days.map((day) => (
+                                    <SelectItem key={day} value={day}>{day}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
-
                     <div className="mt-2">
                         <h2 className="text-2xl font-semibold text-gray-700">{subscribedAgents}</h2>
                         <p className="text-sm text-gray-500">New Subscribers</p>

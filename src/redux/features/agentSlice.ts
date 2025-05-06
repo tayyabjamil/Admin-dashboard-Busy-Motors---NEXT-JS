@@ -31,6 +31,8 @@ interface AgentState {
   loading: boolean;
   error: string | null;
   subscriptionFilter: string;
+  selectedMonth: string;
+  selectedDay: string;
 }
 
 const initialState: AgentState = {
@@ -41,6 +43,8 @@ const initialState: AgentState = {
   loading: false,
   error: null,
   subscriptionFilter: "all",
+  selectedMonth: "JAN",
+  selectedDay: "MON",
 };
 
 interface FetchAgentsSuccessPayload {
@@ -100,6 +104,12 @@ const agentSlice = createSlice({
         state.subscribedAgents = state.filteredUsers.length;
       }
     },
+    setSelectedMonth(state, action: PayloadAction<string>) {
+      state.selectedMonth = action.payload;
+    },
+    setSelectedDay(state, action: PayloadAction<string>) {
+      state.selectedDay = action.payload;
+    },
   },
 });
 
@@ -108,6 +118,8 @@ export const {
   fetchAgentsSuccess,
   fetchAgentsFailure,
   setSubscriptionFilter,
+  setSelectedMonth,
+  setSelectedDay,
 } = agentSlice.actions;
 
 export default agentSlice.reducer;

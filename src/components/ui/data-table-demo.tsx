@@ -109,7 +109,7 @@ export function DataTableDemo() {
 
     React.useEffect(() => {
         fetchUsers()
-    }, [dispatch])
+    }, [dispatch, fetchUsers])
 
     // const deleteUser = async (userId: string) => {
     //     try {
