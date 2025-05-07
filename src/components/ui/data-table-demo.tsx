@@ -79,7 +79,7 @@ export function DataTableDemo() {
     const [pageSize, setPageSize] = React.useState(5)
     const [pageIndex, setPageIndex] = React.useState(0)
 
-    const fetchUsers = async () => {
+    const fetchUsers = React.useCallback(async () => {
         try {
             dispatch(fetchAgentsStart())
             const response = await fetch("https://scrape4you.onrender.com/auth/list-all-agents")
@@ -105,35 +105,45 @@ export function DataTableDemo() {
             dispatch(fetchAgentsFailure(errorMessage))
             console.error(err)
         }
+    }, [dispatch])
+
+    const blockUser = async (userId: string) => {
+        try {
+            const response = await fetch(`https://scrape4you.onrender.com/auth/block/${userId}`, {
+                method: "POST",
+            })
+
+            if (!response.ok) {
+                throw new Error("Failed to block user")
+            }
+
+            // Refresh data after blocking
+            fetchUsers()
+        } catch (err) {
+            console.error("Error blocking user:", err)
+        }
+    }
+
+    const unblockUser = async (userId: string) => {
+        try {
+            const response = await fetch(`https://scrape4you.onrender.com/auth/unblock/${userId}`, {
+                method: "POST",
+            })
+
+            if (!response.ok) {
+                throw new Error("Failed to unblock user")
+            }
+
+            // Refresh data after unblocking
+            fetchUsers()
+        } catch (err) {
+            console.error("Error unblocking user:", err)
+        }
     }
 
     React.useEffect(() => {
         fetchUsers()
-    }, [dispatch, fetchUsers])
-
-    // const deleteUser = async (userId: string) => {
-    //     try {
-    //         const response = await fetch(`https://scrape4you.onrender.com/auth/delete-agent/${userId}`, {
-    //             method: "DELETE",
-    //         })
-
-    //         if (!response.ok) {
-    //             throw new Error("Failed to delete user")
-    //         }
-
-    //         // Refresh data after deletion
-    //         fetchUsers()
-
-    //         toast("User deleted successfully", {
-    //             description: "User has been successfully removed",
-    //         })
-    //     } catch (err) {
-    //         console.error("Error deleting user:", err)
-    //         toast("Error", {
-    //             description: "Failed to delete user",
-    //         })
-    //     }
-    // }
+    }, [dispatch])
 
     const columns: ColumnDef<User>[] = [
         {
@@ -222,7 +232,7 @@ export function DataTableDemo() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction /* onClick={handleUnblockUser} */>Unblock</AlertDialogAction>
+                                    <AlertDialogAction onClick={() => unblockUser(user._id)}>Unblock</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
@@ -242,7 +252,7 @@ export function DataTableDemo() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction /* onClick={handleBlockUser} */>Block</AlertDialogAction>
+                                    <AlertDialogAction onClick={() => blockUser(user._id)}>Block</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
