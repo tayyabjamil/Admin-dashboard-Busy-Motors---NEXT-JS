@@ -82,7 +82,7 @@ export function DataTableDemo() {
     const fetchUsers = React.useCallback(async () => {
         try {
             dispatch(fetchAgentsStart())
-            const response = await fetch("https://scrape4you.onrender.com/auth/list-all-agents")
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/list-all-agents`)
             if (!response.ok) {
                 throw new Error("Failed to fetch users")
             }
@@ -109,7 +109,7 @@ export function DataTableDemo() {
 
     const blockUser = async (userId: string) => {
         try {
-            const response = await fetch(`https://scrape4you.onrender.com/auth/block/${userId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/block/${userId}`, {
                 method: "POST",
             })
 
@@ -126,7 +126,7 @@ export function DataTableDemo() {
 
     const unblockUser = async (userId: string) => {
         try {
-            const response = await fetch(`https://scrape4you.onrender.com/auth/unblock/${userId}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/unblock/${userId}`, {
                 method: "POST",
             })
 
@@ -175,7 +175,7 @@ export function DataTableDemo() {
                         <Image
                             width={35}
                             height={35}
-                            src={user.profile_image || "/placeholder.svg"}
+                            src={user.profile_image && user.profile_image !== "N/A" ? user.profile_image : "/placeholder.svg"}
                             alt={`${user.first_name} ${user.last_name}`}
                             className="rounded-full"
                         />

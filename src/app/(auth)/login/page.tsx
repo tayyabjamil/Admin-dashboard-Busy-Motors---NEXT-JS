@@ -37,7 +37,7 @@ export default function Login() {
         setError("")
 
         try {
-            const response = await fetch("https://scrape4you.onrender.com/admin/login", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
