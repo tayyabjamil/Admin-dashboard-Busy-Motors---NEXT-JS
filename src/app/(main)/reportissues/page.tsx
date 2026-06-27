@@ -115,10 +115,6 @@ export default function ReportIssuesPage() {
             header: "Action",
             cell: ({ row }) => {
                 const issue = row.original
-                const isResolved = issue.status?.toLowerCase() === "resolved"
-                if (isResolved) {
-                    return <span className="text-sm text-gray-400">Resolved</span>
-                }
                 return (
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
