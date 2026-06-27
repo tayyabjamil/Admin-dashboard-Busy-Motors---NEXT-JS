@@ -1,10 +1,12 @@
 "use client";
 import { configureStore } from "@reduxjs/toolkit";
 import agentReducer from "./features/agentSlice";
+import reportIssuesReducer from "./features/reportIssuesSlice";
 
 export const store = configureStore({
   reducer: {
     agents: agentReducer,
+    reportIssues: reportIssuesReducer,
   },
 });
 
